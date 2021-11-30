@@ -3,14 +3,10 @@ import json
 from os import fork
 from urllib.parse import urljoin, urlencode
 import hmac
-import asyncio
 import aiohttp
-from datetime import date, datetime
-from aiohttp import http
-from asyncio.exceptions import LimitOverrunError
-from requests.models import HTTPError
+from datetime import datetime
+
 import base64
-import copy
 
 # from log import logger
 

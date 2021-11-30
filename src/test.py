@@ -17,10 +17,8 @@ async def main():
         True,
     )
     await ok.asyncinit()
-    id = "BTC-USDT-220325"
-    price = (await ok.get_ticker(id))["data"][0]["askPx"]
-    d = await ok.get_positions(INST_TYPE_FUTURES, id)
-    print(d["data"][0]["availPos"] == "")
+    id = "DOT-USDT-220325"
+    print(await ok.get_instruments(INST_TYPE_FUTURES, instId=id))
     await ok.close()
 
 
