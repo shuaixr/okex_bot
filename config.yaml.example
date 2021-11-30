@@ -1,0 +1,8 @@
+api:
+  key: ""
+  secretkey: ""
+  passphrase: ""
+task_list:
+  - id: "DOT-USDT-220325"
+    bar: "5m"
+    margin: 

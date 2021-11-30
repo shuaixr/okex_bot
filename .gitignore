@@ -1,0 +1,5 @@
+config.yaml
+venv/
+data/
+logger.log
+*/__pycache__
