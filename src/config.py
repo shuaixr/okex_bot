@@ -40,6 +40,7 @@ class Config:
             task = Task(
                 client=client,
                 id=item["id"],
+                margin=item["margin"],
                 bar=get_local_or_global_config("bar"),
             )
             self.task_list.append(task)
