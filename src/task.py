@@ -234,16 +234,18 @@ class Task:
         if side != None:
             self.logger.debug(f"New side {side} at {self.side_history}")
             if self.positions["availPos"] != "":
+                coside = (
+                    SIDE_SELL
+                    if self.positions["posSide"] == POS_SIDE_LONG
+                    else SIDE_BUY
+                )
                 await self.create_order_wait_filled(
                     ORDER_TD_MODE_CROSS,
-                    (
-                        SIDE_SELL
-                        if self.positions["posSide"] == POS_SIDE_LONG
-                        else SIDE_BUY
-                    ),
+                    coside,
                     ORDER_TYPE_LIMIT,
                     self.positions["availPos"],
                     self.positions["posSide"],
+                    (await self.get_price(coside)),
                 )
                 coside = (
                     SIDE_BUY
@@ -265,5 +267,6 @@ class Task:
                     ORDER_TYPE_LIMIT,
                     sz,
                     side,
+                    (await self.get_price(coside)),
                 )
                 await self.refresh_positions()
