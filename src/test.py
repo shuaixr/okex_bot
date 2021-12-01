@@ -1,5 +1,6 @@
 from okex import (
     INST_TYPE_FUTURES,
+    MGN_MODE_CROSS,
     OKEX,
     ORDER_TD_MODE_CROSS,
     ORDER_TYPE_LIMIT,
@@ -18,7 +19,7 @@ async def main():
     )
     await ok.asyncinit()
     id = "DOT-USDT-220325"
-    print(await ok.get_instruments(INST_TYPE_FUTURES, instId=id))
+    print((int)((await ok.get_leverage_info(id, MGN_MODE_CROSS))["data"][0]["lever"]))
     await ok.close()
 
 

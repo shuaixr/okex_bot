@@ -150,7 +150,9 @@ class Task:
 
     async def get_lever(self) -> int:
         return (int)(
-            (await self.client.get_leverage_info(id, MGN_MODE_CROSS))["data"][0]["lever"]
+            (await self.client.get_leverage_info(self.id, MGN_MODE_CROSS))["data"][0][
+                "lever"
+            ]
         )
 
     async def set_lever(self, lever: int):
@@ -248,9 +250,7 @@ class Task:
                     (await self.get_price(coside)),
                 )
             coside = (
-                SIDE_BUY
-                if self.positions["posSide"] == POS_SIDE_LONG
-                else SIDE_SELL
+                SIDE_BUY if self.positions["posSide"] == POS_SIDE_LONG else SIDE_SELL
             )
             price = await self.get_price(coside)
             ctVal = (float)(self.instruments["ctVal"])
