@@ -183,7 +183,7 @@ class Task:
         return None
 
     async def get_price(self, side: str) -> int:
-        return (int)(
+        return (float)(
             (await self.client.get_ticker(self.id))["data"][0][
                 "bidPx" if side == SIDE_BUY else "askPx"
             ]
