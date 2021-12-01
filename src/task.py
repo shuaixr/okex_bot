@@ -1,4 +1,4 @@
-import asyncio
+7import asyncio
 import math
 from typing import Union
 from decimal import Decimal
@@ -150,7 +150,7 @@ class Task:
 
     async def get_lever(self) -> int:
         return (int)(
-            (await client.get_leverage_info(id, MGN_MODE_CROSS))["data"][0]["lever"]
+            (await self.client.get_leverage_info(id, MGN_MODE_CROSS))["data"][0]["lever"]
         )
 
     async def set_lever(self, lever: int):
