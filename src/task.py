@@ -247,26 +247,26 @@ class Task:
                     self.positions["posSide"],
                     (await self.get_price(coside)),
                 )
-                coside = (
-                    SIDE_BUY
-                    if self.positions["posSide"] == POS_SIDE_LONG
-                    else SIDE_SELL
-                )
-                price = await self.get_price(coside)
-                ctVal = (float)(self.instruments["ctVal"])
-                lever = await self.get_lever()
-                sz = self.margin / price / ctVal * lever
-                minisz = (float)(self.instruments["minSz"])
-                if sz < minisz:
-                    sz = minisz
-                sz = round_step_size(sz, ((float)(self.instruments["lotSz"])))
-                sz = int(sz) if sz.is_integer() else sz
-                await self.create_order_wait_filled(
-                    ORDER_TD_MODE_CROSS,
-                    coside,
-                    ORDER_TYPE_LIMIT,
-                    sz,
-                    side,
-                    (await self.get_price(coside)),
-                )
-                await self.refresh_positions()
+            coside = (
+                SIDE_BUY
+                if self.positions["posSide"] == POS_SIDE_LONG
+                else SIDE_SELL
+            )
+            price = await self.get_price(coside)
+            ctVal = (float)(self.instruments["ctVal"])
+            lever = await self.get_lever()
+            sz = self.margin / price / ctVal * lever
+            minisz = (float)(self.instruments["minSz"])
+            if sz < minisz:
+                sz = minisz
+            sz = round_step_size(sz, ((float)(self.instruments["lotSz"])))
+            sz = int(sz) if sz.is_integer() else sz
+            await self.create_order_wait_filled(
+                ORDER_TD_MODE_CROSS,
+                coside,
+                ORDER_TYPE_LIMIT,
+                sz,
+                side,
+                (await self.get_price(coside)),
+            )
+            await self.refresh_positions()
