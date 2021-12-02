@@ -45,10 +45,14 @@ def round_step_size(
 
 
 class Task:
-    def __init__(self, client: OKEX, id: int, margin: float, bar: str) -> None:
+    def __init__(
+        self, client: OKEX, id: int, min_margin: float, max_margin: float, bar: str
+    ) -> None:
         self.client = client
         self.id = id
-        self.margin = margin
+        self.min_margin = min_margin
+
+        self.max_margin = max_margin
         self.bar = bar
         self.barms = stm[bar]
         self.logger = logger.getChild(f"Task({id}/{bar})")
@@ -56,6 +60,7 @@ class Task:
 
         self.positions = None
         self.side_history = None
+        self.ratio = 0.0
         pass
 
     async def asyncinit(self):
@@ -79,19 +84,18 @@ class Task:
         before = None
         after = None
         for _ in range(10):
+            candles = await client.candles(
+                self.id,
+                self.bar,
+                after=after,
+                before=before,
+                limt=100,
+            )
+            if candles["code"] != "0":
+                raise Exception("get_thousand_kline code not 0. " + str(candles))
             klines = klines.append(
                 DataFrame(
-                    pd.array(
-                        (
-                            await client.candles(
-                                self.id,
-                                self.bar,
-                                after=after,
-                                before=before,
-                                limt=100,
-                            )
-                        )["data"]
-                    ),
+                    pd.array(candles["data"]),
                     dtype=float,
                     columns=(
                         "Open Time",
@@ -122,30 +126,47 @@ class Task:
         klines["adx_neg"] = adx.adx_neg()
         klines["adx_pos"] = adx.adx_pos()
 
-    def count_lever(self, klines: DataFrame, side: str, min, max) -> int:
+    def count_ratio(self, klines: DataFrame, side: str) -> float:
         row = klines.iloc[-2]
         adx = row["adx"]
         adx_neg = row["adx_neg"]
         adx_pos = row["adx_pos"]
-        lever = (int)(
+        ratio = (
             (
                 (
-                    (
-                        adx
-                        + (
-                            adx_pos - adx_neg
-                            if side == POS_SIDE_LONG
-                            else adx_neg - adx_pos
-                        )
+                    adx
+                    + (
+                        adx_pos - adx_neg
+                        if side == POS_SIDE_LONG
+                        else adx_neg - adx_pos
                     )
-                    / 2
                 )
-                if side != None
-                else adx
+                / 2
             )
-            / 100
-            * (max - min)
-        ) + min
+            if side != None
+            else adx
+        ) / 100
+        return 0 if ratio < 0 else (1 if ratio > 1 else ratio)
+
+    def count_sz(self, price: float, ctVal: float, lever: int) -> Union[int, float]:
+        min_margin = self.min_margin
+        max_margin = self.max_margin
+        sz = (
+            (self.ratio * (max_margin - min_margin) + min_margin)
+            / price
+            / ctVal
+            * lever
+        )
+        minisz = (float)(self.instruments["minSz"])
+        if sz < minisz:
+            sz = minisz
+        sz = round_step_size(sz, ((float)(self.instruments["lotSz"])))
+        sz = int(sz) if sz.is_integer() else sz
+        return sz
+
+    def count_lever(self, min, max) -> int:
+
+        lever = (int)(self.ratio * (max - min)) + min
         return min if lever < min else lever
 
     async def get_lever(self) -> int:
@@ -184,10 +205,12 @@ class Task:
             return POS_SIDE_LONG if row2["PMax_dir"] == 1 else POS_SIDE_SHORT
         return None
 
-    async def get_price(self, side: str) -> int:
+    async def get_price(self, side: str = None) -> int:
         return (float)(
             (await self.client.get_ticker(self.id))["data"][0][
-                "bidPx" if side == SIDE_BUY else "askPx"
+                "bidPx"
+                if side == SIDE_BUY
+                else ("askPx" if side == SIDE_SELL else "last")
             ]
         )
 
@@ -219,54 +242,79 @@ class Task:
 
         return False
 
-    async def run(self):
+    async def change_side(self, side: str):
+        if self.positions["availPos"] != "":
+            coside = (
+                SIDE_SELL if self.positions["posSide"] == POS_SIDE_LONG else SIDE_BUY
+            )
+            await self.create_order_wait_filled(
+                ORDER_TD_MODE_CROSS,
+                coside,
+                ORDER_TYPE_LIMIT,
+                self.positions["availPos"],
+                self.positions["posSide"],
+                (await self.get_price(coside)),
+            )
+        coside = SIDE_BUY if side == POS_SIDE_LONG else SIDE_SELL
+        price = await self.get_price(coside)
+        ctVal = (float)(self.instruments["ctVal"])
+        lever = await self.get_lever()
+        sz = self.count_sz(price, ctVal, lever)
+        await self.create_order_wait_filled(
+            ORDER_TD_MODE_CROSS,
+            coside,
+            ORDER_TYPE_LIMIT,
+            sz,
+            side,
+            (await self.get_price(coside)),
+        )
+
+    async def change_sz(self):
+        price = await self.get_price()
+        ctVal = (float)(self.instruments["ctVal"])
+        lever = await self.get_lever()
+        sz = self.count_sz(price, ctVal, lever)
+        availPos = self.positions["availPos"]
+        if sz == availPos:
+            return
+        diff = sz - availPos
+        coside = (
+            (SIDE_SELL if diff < 0 else SIDE_BUY)
+            if self.positions["posSide"] == POS_SIDE_LONG
+            else (SIDE_BUY if diff < 0 else SIDE_SELL)
+        )
+        await self.create_order_wait_filled(
+            ORDER_TD_MODE_CROSS,
+            coside,
+            ORDER_TYPE_LIMIT,
+            abs(diff),
+            self.positions["posSide"],
+            (await self.get_price(coside)),
+        )
+
+    async def __run(self):
 
         await self.refresh_positions()
 
         klines = await self.get_thousand_kline()
         self.init_indicators(klines)
-
+        self.ratio = self.count_ratio(
+            klines,
+            self.positions["posSide"] if self.positions["availPos"] != "" else None,
+        )
         if self.positions["availPos"] != "":
-            lever = self.count_lever(
-                klines, self.positions["posSide"], 1, int(self.instruments["lever"])
-            )
+            lever = self.count_lever(1, int(self.instruments["lever"]))
             await self.set_lever(lever=lever)
 
         side = self.get_side(klines)
         if side != None:
             self.logger.debug(f"New side {side} at {self.side_history}")
-            if self.positions["availPos"] != "":
-                coside = (
-                    SIDE_SELL
-                    if self.positions["posSide"] == POS_SIDE_LONG
-                    else SIDE_BUY
-                )
-                await self.create_order_wait_filled(
-                    ORDER_TD_MODE_CROSS,
-                    coside,
-                    ORDER_TYPE_LIMIT,
-                    self.positions["availPos"],
-                    self.positions["posSide"],
-                    (await self.get_price(coside)),
-                )
-            coside = (
-                SIDE_BUY if self.positions["posSide"] == POS_SIDE_LONG else SIDE_SELL
-            )
-            price = await self.get_price(coside)
-            ctVal = (float)(self.instruments["ctVal"])
-            lever = await self.get_lever()
-            sz = self.margin / price / ctVal * lever
-            minisz = (float)(self.instruments["minSz"])
-            if sz < minisz:
-                sz = minisz
-            sz = round_step_size(sz, ((float)(self.instruments["lotSz"])))
-            sz = int(sz) if sz.is_integer() else sz
-            await self.create_order_wait_filled(
-                ORDER_TD_MODE_CROSS,
-                coside,
-                ORDER_TYPE_LIMIT,
-                sz,
-                side,
-                (await self.get_price(coside)),
-            )
-            await self.refresh_positions()
+            await self.change_side(side)
+        elif self.positions["availPos"] != "":
+            await self.change_sz()
+
+    async def run(self):
+        try:
+            await self.__run()
+        except Exception as e:
+            self.logger.warning(e)

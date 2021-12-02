@@ -18,8 +18,8 @@ async def main():
         True,
     )
     await ok.asyncinit()
-    id = "DOT-USDT-220325"
-    print((int)((await ok.get_leverage_info(id, MGN_MODE_CROSS))["data"][0]["lever"]))
+    id = "ETH-USDT-220325"
+    print(await ok.get_positions(instId=id))
     await ok.close()
 
 
