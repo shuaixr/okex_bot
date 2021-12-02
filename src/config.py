@@ -40,7 +40,8 @@ class Config:
             task = Task(
                 client=client,
                 id=item["id"],
-                margin=item["margin"],
+                min_margin=item["min_margin"],
+                max_margin=item["max_margin"],
                 bar=get_local_or_global_config("bar"),
             )
             self.task_list.append(task)

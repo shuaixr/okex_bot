@@ -5,4 +5,5 @@ api:
 task_list:
   - id: "DOT-USDT-220325"
     bar: "5m"
-    margin: 
+    min_margin: 
+    max_margin: 
