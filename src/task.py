@@ -298,19 +298,24 @@ class Task:
 
         klines = await self.get_thousand_kline()
         self.init_indicators(klines)
-        self.ratio = self.count_ratio(
-            klines,
-            self.positions["posSide"] if self.positions["availPos"] != "" else None,
-        )
-        if self.positions["availPos"] != "":
-            lever = self.count_lever(1, int(self.instruments["lever"]))
-            await self.set_lever(lever=lever)
-
+        
         side = self.get_side(klines)
         if side != None:
+            self.ratio = self.count_ratio(
+                klines,
+                side,
+            )
+            lever = self.count_lever(1, int(self.instruments["lever"]))
+            await self.set_lever(lever=lever)
             self.logger.debug(f"New side {side} at {self.side_history}")
             await self.change_side(side)
         elif self.positions["availPos"] != "":
+            self.ratio = self.count_ratio(
+                klines,
+                self.positions["posSide"] if self.positions["availPos"] != "" else None,
+            )
+            lever = self.count_lever(1, int(self.instruments["lever"]))
+            await self.set_lever(lever=lever)
             await self.change_sz()
 
     async def run(self):
