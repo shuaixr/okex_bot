@@ -31,6 +31,7 @@ class Config:
             api_key=exchange_config["key"],
             api_secretkey=exchange_config["secretkey"],
             api_passphrase=exchange_config["passphrase"],
+            testnet=exchange_config["testnetS"]
         )
         await client.asyncinit()
         self.client = client
