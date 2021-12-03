@@ -234,7 +234,7 @@ class Task:
             status = (await client.get_order(id, orderid))["data"][0]["state"]
             if status == "filled":
                 return True
-            asyncio.sleep(2)
+            await asyncio.sleep(2)
         self.logger.warning(f"Wait order filled timeout, Chanel order")
         d = (await client.cancel_order(id, orderid))["data"][0]
         if d["sCode"] != "0":
