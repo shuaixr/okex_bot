@@ -3,9 +3,7 @@ import telebot
 
 
 class TelegramHandler(logging.Handler):
-    def __init__(
-        self, token: str, id: str, level: logging._Level = logging.NOTSET
-    ) -> None:
+    def __init__(self, token: str, id: str, level=logging.NOTSET) -> None:
         self.bot = telebot.TeleBot(token=token)
         self.id = id
         super(TelegramHandler, self).__init__(level=level)
