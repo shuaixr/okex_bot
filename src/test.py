@@ -18,8 +18,8 @@ async def main():
         True,
     )
     await ok.asyncinit()
-    id = "ETH-USDT-220325"
-    print(await ok.get_positions(instId=id))
+    id = "DOT-USDT-220325"
+    print(await ok.get_instruments(INST_TYPE_FUTURES, instId=id))
     await ok.close()
 
 

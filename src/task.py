@@ -182,6 +182,7 @@ class Task:
         if (await self.get_lever()) != lever:
             d = await client.set_leverage(id, str(lever), MGN_MODE_CROSS)
             if d["code"] == "0":
+                await self.refresh_positions()
                 self.logger.debug(f"Change lever to {lever}")
             else:
                 self.logger.warning(f"Change lever failed. Msg: {str(d)}")
@@ -223,18 +224,22 @@ class Task:
         posSide: str = None,
         px: str = None,
     ) -> bool:
+
         client = self.client
         id = self.id
+        self.logger.debug(
+            f"Create order wait filled. id:{id}, tdMode:{tdMode}, side:{side}, ordType:{ordType}, sz:{sz}, posSide:{posSide}, px:{px}"
+        )
         d = (await client.order(id, tdMode, side, ordType, sz, posSide, px))["data"][0]
         if d["sCode"] != "0":
             self.logger.warning(f"Create order failed. {str(d)}")
             return False
         orderid = d["ordId"]
-        for _ in range(30):
+        for _ in range(10):
             status = (await client.get_order(id, orderid))["data"][0]["state"]
             if status == "filled":
                 return True
-            await asyncio.sleep(2)
+            await asyncio.sleep(3)
         self.logger.warning(f"Wait order filled timeout, Chanel order")
         d = (await client.cancel_order(id, orderid))["data"][0]
         if d["sCode"] != "0":
@@ -243,18 +248,27 @@ class Task:
         return False
 
     async def change_side(self, side: str):
-        if self.positions["availPos"] != "":
-            coside = (
-                SIDE_SELL if self.positions["posSide"] == POS_SIDE_LONG else SIDE_BUY
-            )
-            await self.create_order_wait_filled(
-                ORDER_TD_MODE_CROSS,
-                coside,
-                ORDER_TYPE_LIMIT,
-                self.positions["availPos"],
-                self.positions["posSide"],
-                (await self.get_price(coside)),
-            )
+        self.logger.debug(f"Change side to {side}")
+        while 1:
+            if self.positions["availPos"] != "":
+                self.logger.debug("Close the reverse order")
+                coside = (
+                    SIDE_SELL
+                    if self.positions["posSide"] == POS_SIDE_LONG
+                    else SIDE_BUY
+                )
+                if await self.create_order_wait_filled(
+                    ORDER_TD_MODE_CROSS,
+                    coside,
+                    ORDER_TYPE_LIMIT,
+                    self.positions["availPos"],
+                    self.positions["posSide"],
+                    (await self.get_price(coside)),
+                ):
+                    break
+                self.refresh_positions()
+            else:
+                break
         coside = SIDE_BUY if side == POS_SIDE_LONG else SIDE_SELL
         price = await self.get_price(coside)
         ctVal = (float)(self.instruments["ctVal"])
@@ -278,6 +292,7 @@ class Task:
         if sz == availPos:
             return
         diff = sz - availPos
+        self.logger.debug(f"Change sz {diff}.")
         coside = (
             (SIDE_SELL if diff < 0 else SIDE_BUY)
             if self.positions["posSide"] == POS_SIDE_LONG
@@ -298,24 +313,28 @@ class Task:
 
         klines = await self.get_thousand_kline()
         self.init_indicators(klines)
-        
+
         side = self.get_side(klines)
+
+        self.ratio = self.count_ratio(
+            klines,
+            (
+                side
+                if side != None
+                else (
+                    self.positions["posSide"]
+                    if self.positions["availPos"] != ""
+                    else None
+                )
+            ),
+        )
+
+        lever = self.count_lever(1, int(self.instruments["lever"]))
+        await self.set_lever(lever=lever)
         if side != None:
-            self.ratio = self.count_ratio(
-                klines,
-                side,
-            )
-            lever = self.count_lever(1, int(self.instruments["lever"]))
-            await self.set_lever(lever=lever)
             self.logger.debug(f"New side {side} at {self.side_history}")
             await self.change_side(side)
         elif self.positions["availPos"] != "":
-            self.ratio = self.count_ratio(
-                klines,
-                self.positions["posSide"] if self.positions["availPos"] != "" else None,
-            )
-            lever = self.count_lever(1, int(self.instruments["lever"]))
-            await self.set_lever(lever=lever)
             await self.change_sz()
 
     async def run(self):
