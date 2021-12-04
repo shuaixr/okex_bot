@@ -309,7 +309,7 @@ class Task:
         ctVal = (float)(self.instruments["ctVal"])
         lever = await self.get_lever()
         sz = self.count_sz(price, ctVal, lever)
-        availPos = self.positions["availPos"]
+        availPos = int(self.positions["availPos"])
         if sz == availPos:
             return
         diff = sz - availPos

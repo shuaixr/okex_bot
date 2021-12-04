@@ -18,8 +18,8 @@ async def main():
         True,
     )
     await ok.asyncinit()
-    id = "ADA-USDT-220325"
-    print(await ok.get_instruments(instType=INST_TYPE_FUTURES, instId=id))
+    id = "FIL-USDT-220325"
+    print(await ok.get_positions(instType=INST_TYPE_FUTURES, instId=id))
     await ok.close()
 
 
