@@ -59,7 +59,6 @@ class Task:
         self.logger.debug("Task init")
 
         self.positions = None
-        self.side_history = None
         self.ratio = 0.0
 
         self.klines_cache = pd.DataFrame(
@@ -219,13 +218,12 @@ class Task:
     def get_side(self, klines: DataFrame) -> str:
         row2 = klines.iloc[-2]
         row3 = klines.iloc[-3]
-        if (
-            row3["PMax_dir"] != row2["PMax_dir"]
-            and row2["Open Time"] != self.side_history
-        ):
-            self.side_history = row2["Open Time"]
-            return POS_SIDE_LONG if row2["PMax_dir"] == 1 else POS_SIDE_SHORT
-        return None
+        side = None
+        if row3["PMax_dir"] != row2["PMax_dir"]:
+            side = POS_SIDE_LONG if row2["PMax_dir"] == 1 else POS_SIDE_SHORT
+        if side == self.positions["posSide"]:
+            side = None
+        return side
 
     async def get_price(self, side: str = None) -> int:
         return (float)(
