@@ -7,7 +7,7 @@ from pandas.core.frame import DataFrame
 from ta.trend import ADXIndicator
 from log import logger
 import pandas as pd
-
+import traceback
 from okex import (
     INST_TYPE_FUTURES,
     MGN_MODE_CROSS,
@@ -362,4 +362,4 @@ class Task:
         try:
             await self.__run()
         except Exception as e:
-            self.logger.warning(e)
+            self.logger.warning(e + traceback.format_exc())

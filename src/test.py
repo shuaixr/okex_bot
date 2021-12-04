@@ -18,14 +18,8 @@ async def main():
         True,
     )
     await ok.asyncinit()
-    id = "DOT-USDT-220325"
-    print(
-        await ok.candles(
-            id,
-            "5m",
-            limt=100,
-        )
-    )
+    id = "ADA-USDT-220325"
+    print(await ok.get_instruments(instType=INST_TYPE_FUTURES, instId=id))
     await ok.close()
 
 
