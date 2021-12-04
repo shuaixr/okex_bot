@@ -226,13 +226,20 @@ class Task:
         return side
 
     async def get_price(self, side: str = None) -> int:
-        return (float)(
-            (await self.client.get_ticker(self.id))["data"][0][
-                "bidPx"
-                if side == SIDE_BUY
-                else ("askPx" if side == SIDE_SELL else "last")
-            ]
-        )
+        ticksz = (float)(self.positions["tickSz"])
+        ticker = (await self.client.get_ticker(self.id))["data"][0]
+
+        bid = (float)(ticker["bidPx"])
+        ask = (float)(ticker["askPx"])
+        last = (float)(ticker["last"])
+        if side == None:
+            return last
+        ab = ask - bid
+        ab2 = ab / 2
+        price = bid if side == SIDE_BUY else ask
+        if ab > (ticksz * 2):
+            price = price + ab2 if side == SIDE_BUY else price - ab2
+        return (price + last) / 2
 
     async def create_order_wait_filled(
         self,
