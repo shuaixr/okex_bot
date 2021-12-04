@@ -72,6 +72,9 @@ class Task:
                 "VolumeCcy",
             )
         )
+        self.indicators_cache: DataFrame = None
+        self.indicators_cache_time = None
+
         pass
 
     async def asyncinit(self):
@@ -137,7 +140,10 @@ class Task:
         klines["Open Time"] = pd.to_datetime(klines["Open Time"], unit="ms", utc=True)
         return klines
 
-    def init_indicators(self, klines: DataFrame):
+    def init_indicators(self, klines: DataFrame) -> DataFrame:
+        last_ot = klines.iloc[-2]["Open Time"]
+        if self.indicators_cache_time == last_ot:
+            return self.indicators_cache
         klines["PMax"], klines["PMax_MA"], klines["PMax_dir"] = pmax(
             klines["High"], klines["Low"], klines["Close"], 10, 3, 10
         )
@@ -145,6 +151,10 @@ class Task:
         klines["adx"] = adx.adx()
         klines["adx_neg"] = adx.adx_neg()
         klines["adx_pos"] = adx.adx_pos()
+
+        self.indicators_cache_time = last_ot
+        self.indicators_cache = klines
+        return klines
 
     def count_ratio(self, klines: DataFrame, side: str) -> float:
         row = klines.iloc[-2]
