@@ -19,7 +19,7 @@ async def main():
     )
     await ok.asyncinit()
     id = "DOT-USDT-220325"
-    print(await ok.get_instruments(INST_TYPE_FUTURES, instId=id))
+    print(await ok.get_positions(instId=id))
     await ok.close()
 
 

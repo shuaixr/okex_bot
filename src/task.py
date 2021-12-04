@@ -328,9 +328,9 @@ class Task:
                 )
             ),
         )
-
-        lever = self.count_lever(1, int(self.instruments["lever"]))
-        await self.set_lever(lever=lever)
+        if side != None or self.positions["availPos"] != "":
+            lever = self.count_lever(1, int(self.instruments["lever"]))
+            await self.set_lever(lever=lever)
         if side != None:
             self.logger.debug(f"New side {side} at {self.side_history}")
             await self.change_side(side)

@@ -3,7 +3,7 @@ from task import Task
 from typing import List
 import yaml
 from okex import OKEX
-from log import logger
+from log import logger, set_telegram_log
 
 Config = None
 
@@ -26,12 +26,14 @@ class Config:
                 self.config = yaml.safe_load(stream)
             except yaml.YAMLError as exc:
                 logger.error(exc)
+        telelog = self.config["telegram"]
+        set_telegram_log(telelog["token"], telelog["id"])
         exchange_config = self.config["api"]
         client = OKEX(
             api_key=exchange_config["key"],
             api_secretkey=exchange_config["secretkey"],
             api_passphrase=exchange_config["passphrase"],
-            testnet=exchange_config["testnet"]
+            testnet=exchange_config["testnet"],
         )
         await client.asyncinit()
         self.client = client

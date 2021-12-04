@@ -3,6 +3,9 @@ api:
   secretkey: ""
   passphrase: ""
   testnet: False
+telegram:
+  token: ""
+  id: ""
 task_list:
   - id: "DOT-USDT-220325"
     bar: "5m"
