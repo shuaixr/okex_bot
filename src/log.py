@@ -3,10 +3,12 @@ import telebot
 
 
 class TelegramHandler(logging.Handler):
-    def __init__(self, token: str, id: str, level: logging._Level = ...) -> None:
+    def __init__(
+        self, token: str, id: str, level: logging._Level = logging.NOTSET
+    ) -> None:
         self.bot = telebot.TeleBot(token=token)
         self.id = id
-        super().__init__(level=level)
+        super(TelegramHandler, self).__init__(level=level)
 
     def emit(self, record: logging.LogRecord) -> None:
         self.bot.send_message(self.id, self.format(record=record))
