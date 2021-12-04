@@ -26,8 +26,9 @@ class Config:
                 self.config = yaml.safe_load(stream)
             except yaml.YAMLError as exc:
                 logger.error(exc)
-        telelog = self.config["telegram"]
-        set_telegram_log(telelog["token"], telelog["id"])
+        telelog = self.config.get("telegram", None)
+        if telelog != None:
+            set_telegram_log(telelog["token"], telelog["id"])
         exchange_config = self.config["api"]
         client = OKEX(
             api_key=exchange_config["key"],

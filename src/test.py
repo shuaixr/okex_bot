@@ -19,7 +19,13 @@ async def main():
     )
     await ok.asyncinit()
     id = "DOT-USDT-220325"
-    print(await ok.get_positions(instId=id))
+    print(
+        await ok.candles(
+            id,
+            "5m",
+            limt=100,
+        )
+    )
     await ok.close()
 
 

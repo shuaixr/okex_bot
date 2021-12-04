@@ -61,6 +61,18 @@ class Task:
         self.positions = None
         self.side_history = None
         self.ratio = 0.0
+
+        self.klines_cache = pd.DataFrame(
+            columns=(
+                "Open Time",
+                "Open",
+                "High",
+                "Low",
+                "Close",
+                "Volume",
+                "VolumeCcy",
+            )
+        )
         pass
 
     async def asyncinit(self):
@@ -81,6 +93,9 @@ class Task:
                 "VolumeCcy",
             )
         )
+        end = None
+        if len(self.klines_cache.index) != 0:
+            end = (int)(self.klines_cache.iloc[2]["Open Time"])
         before = None
         after = None
         for _ in range(10):
@@ -109,9 +124,15 @@ class Task:
                 ),
                 ignore_index=True,
             )
+            if end != None and before != None and before < end:
+                klines = klines.append(self.klines_cache, ignore_index=True)
+                klines = klines.drop_duplicates(subset=["Open Time"], ignore_index=True)
+                break
             after = (int)(klines.iloc[-1]["Open Time"])
             before = after - self.barms * 11
-
+        if len(klines.index) > 1000:
+            klines = klines.head(1000)
+        self.klines_cache = klines
         klines = klines.loc[::-1].set_index(klines.index)
 
         klines["Open Time"] = pd.to_datetime(klines["Open Time"], unit="ms", utc=True)
