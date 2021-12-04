@@ -249,7 +249,7 @@ class Task:
         price = bid if side == SIDE_BUY else ask
         if ab > (ticksz * 2):
             price = price + ab2 if side == SIDE_BUY else price - ab2
-        return (price + last) / 2
+        return round_step_size((price + last) / 2, ticksz)
 
     async def create_order_wait_filled(
         self,
@@ -347,7 +347,7 @@ class Task:
         await self.refresh_positions()
 
         klines = await self.get_thousand_kline()
-        self.init_indicators(klines)
+        klines = self.init_indicators(klines)
 
         side = self.get_side(klines)
 
