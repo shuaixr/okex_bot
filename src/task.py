@@ -236,7 +236,7 @@ class Task:
         return side
 
     async def get_price(self, side: str = None) -> int:
-        ticksz = (float)(self.positions["tickSz"])
+        ticksz = (float)(self.instruments["tickSz"])
         ticker = (await self.client.get_ticker(self.id))["data"][0]
 
         bid = (float)(ticker["bidPx"])
