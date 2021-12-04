@@ -213,7 +213,7 @@ class Task:
         if d["code"] != "0":
             self.logger.warning(f"refresh_positions failed. Msg: {str(d)}")
             return
-
+        print(d)
         self.positions = d["data"][0]
 
     def get_side(self, klines: DataFrame) -> str:
