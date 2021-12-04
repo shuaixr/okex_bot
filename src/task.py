@@ -304,8 +304,7 @@ class Task:
             (await self.get_price(coside)),
         )
 
-    async def change_sz(self):
-        price = await self.get_price()
+    async def change_sz(self, price: float):
         ctVal = (float)(self.instruments["ctVal"])
         lever = await self.get_lever()
         sz = self.count_sz(price, ctVal, lever)
@@ -356,7 +355,7 @@ class Task:
             self.logger.debug(f"New side {side} at {self.side_history}")
             await self.change_side(side)
         elif self.positions["availPos"] != "":
-            await self.change_sz()
+            await self.change_sz(float(klines.iloc[-2]["Close"]))
 
     async def run(self):
         try:
