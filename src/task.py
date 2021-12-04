@@ -376,4 +376,4 @@ class Task:
         try:
             await self.__run()
         except Exception as e:
-            self.logger.warning(e + str(traceback.format_exc()))
+            self.logger.warning(str(e) + str(traceback.format_exc()))
