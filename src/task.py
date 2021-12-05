@@ -271,11 +271,12 @@ class Task:
             self.logger.warning(f"Create order failed. {str(d)}")
             return False
         orderid = d["ordId"]
-        for _ in range(10):
+        for _ in range(5):
+            await asyncio.sleep(1)
+
             status = (await client.get_order(id, orderid))["data"][0]["state"]
             if status == "filled":
                 return True
-            await asyncio.sleep(3)
         self.logger.warning(f"Wait order filled timeout, Chanel order")
         d = (await client.cancel_order(id, orderid))["data"][0]
         if d["sCode"] != "0":
