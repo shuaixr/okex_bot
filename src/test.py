@@ -5,6 +5,7 @@ from okex import (
     ORDER_TD_MODE_CROSS,
     ORDER_TYPE_LIMIT,
     POS_SIDE_LONG,
+    POS_SIDE_SHORT,
     SIDE_BUY,
 )
 import asyncio
@@ -19,7 +20,7 @@ async def main():
     )
     await ok.asyncinit()
     id = "FIL-USDT-220325"
-    print(await ok.get_positions(instType=INST_TYPE_FUTURES, instId=id))
+    print("short" == POS_SIDE_SHORT)
     await ok.close()
 
 
