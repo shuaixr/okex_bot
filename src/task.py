@@ -147,7 +147,7 @@ class Task:
         klines["PMax"], klines["PMax_MA"], klines["PMax_dir"] = pmax(
             klines["High"], klines["Low"], klines["Close"], 10, 3, 10
         )
-        adx = ADXIndicator(klines["High"], klines["Low"], klines["Close"])
+        adx = ADXIndicator(klines["High"], klines["Low"], klines["Close"], window=28)
         klines["adx"] = adx.adx()
         klines["adx_neg"] = adx.adx_neg()
         klines["adx_pos"] = adx.adx_pos()
