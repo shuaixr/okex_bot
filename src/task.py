@@ -165,6 +165,7 @@ class Task:
         csa, cs = 6, 6
         adx = row["adx"]
         if side == POS_SIDE_LONG:
+            print("l")
             if close < open:
                 cs - 1
             if close < pm:
@@ -176,6 +177,8 @@ class Task:
             if open < pm:
                 cs - 1
         elif side == POS_SIDE_SHORT:
+
+            print("s")
             if close > open:
                 cs - 1
             if close > pm:
