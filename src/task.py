@@ -165,27 +165,28 @@ class Task:
         csa, cs = 6, 6
         adx = row["adx"]
         if side == POS_SIDE_LONG:
-            if close < open:
+            if (close < open).bool():
                 cs - 1
-            if close < pm:
+            if (close < pm).bool():
                 cs - 1
-            if close < pm_ma:
+            if (close < pm_ma).bool():
                 cs - 1
-            if open < pm_ma:
+            if (open < pm_ma).bool():
                 cs - 1
-            if open < pm:
+            if (open < pm).bool():
                 cs - 1
         elif side == POS_SIDE_SHORT:
-            if close > open:
+            if (close > open).bool():
                 cs - 1
-            if close > pm:
+            if (close > pm).bool():
                 cs - 1
-            if close > pm_ma:
+            if (close > pm_ma).bool():
                 cs - 1
-            if open > pm_ma:
+            if (open > pm_ma).bool():
                 cs - 1
-            if open > pm:
+            if (open > pm).bool():
                 cs - 1
+        print(cs)
         adx *= cs / csa
         adx_neg = row["adx_neg"]
         adx_pos = row["adx_pos"]
