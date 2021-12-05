@@ -388,7 +388,9 @@ class Task:
             ),
         )
         if self.ratio_h != self.ratio:
-            logger.debug(f"Ratio changed to {self.ratio},by:{str(klines.iloc[-2])}")
+            self.logger.debug(
+                f"Ratio changed to {self.ratio},by:{str(klines.iloc[-2])}"
+            )
             self.ratio_h = self.ratio
         if side != None or self.positions["availPos"] != "":
             lever = self.count_lever(1, int(self.instruments["lever"]))
