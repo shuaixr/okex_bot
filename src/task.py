@@ -187,7 +187,6 @@ class Task:
                 cs -= 1
             if open > pm:
                 cs -= 1
-        print(f"side:{side},c:{close},o:{open},p:{pm},pm:{pm_ma},cs:{cs}")
         adx *= cs / csa
         adx_neg = row["adx_neg"]
         adx_pos = row["adx_pos"]
