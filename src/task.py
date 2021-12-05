@@ -162,7 +162,7 @@ class Task:
         open = klines["Open"]
         pm = klines["PMax"]
         pm_ma = klines["PMax_MA"]
-        csa, cs = 6
+        csa, cs = 6, 6
         adx = row["adx"]
         if side == POS_SIDE_LONG:
             if close < open:
