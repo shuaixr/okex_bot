@@ -158,7 +158,35 @@ class Task:
 
     def count_ratio(self, klines: DataFrame, side: str) -> float:
         row = klines.iloc[-2]
+        close = klines["Close"]
+        open = klines["Open"]
+        pm = klines["PMax"]
+        pm_ma = klines["PMax_MA"]
+        csa, cs = 6
         adx = row["adx"]
+        if side == POS_SIDE_LONG:
+            if close < open:
+                cs - 1
+            if close < pm:
+                cs - 1
+            if close < pm_ma:
+                cs - 1
+            if open < pm_ma:
+                cs - 1
+            if open < pm:
+                cs - 1
+        elif side == POS_SIDE_SHORT:
+            if close > open:
+                cs - 1
+            if close > pm:
+                cs - 1
+            if close > pm_ma:
+                cs - 1
+            if open > pm_ma:
+                cs - 1
+            if open > pm:
+                cs - 1
+        adx *= cs / csa
         adx_neg = row["adx_neg"]
         adx_pos = row["adx_pos"]
         side_neg_pos_diff = (
@@ -277,7 +305,7 @@ class Task:
 
     async def change_side(self, side: str):
         self.logger.debug(f"Change side to {side}")
-        while 1:
+        while True:
             if self.positions["availPos"] != "":
                 self.logger.debug("Close the reverse order")
                 coside = (
