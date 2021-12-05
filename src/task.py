@@ -96,7 +96,7 @@ class Task:
             )
         )
         end = None
-        if len(self.klines_cache.index) != 0:
+        if len(self.klines_cache.index) != 1000:
             end = (int)(self.klines_cache.iloc[2]["Open Time"])
         before = None
         after = None
@@ -162,8 +162,18 @@ class Task:
         open = row["Open"]
         pm = row["PMax"]
         pm_ma = row["PMax_MA"]
-        csa, cs = 6, 6
+
         adx = row["adx"]
+        adx_neg = row["adx_neg"]
+        adx_pos = row["adx_pos"]
+        side_neg_pos_diff = (
+            adx_pos - adx_neg if side == POS_SIDE_LONG else adx_neg - adx_pos
+        )
+        if side_neg_pos_diff < 0:
+            side_neg_pos_diff *= 2
+        adxnp2 = ((adx + side_neg_pos_diff) / 2) if side != None else adx
+        cs = 6
+        csa = cs
         if side == POS_SIDE_LONG:
             if close < open:
                 cs -= 1
@@ -187,15 +197,8 @@ class Task:
                 cs -= 1
             if open > pm:
                 cs -= 1
-        adx *= cs / csa
-        adx_neg = row["adx_neg"]
-        adx_pos = row["adx_pos"]
-        side_neg_pos_diff = (
-            adx_pos - adx_neg if side == POS_SIDE_LONG else adx_neg - adx_pos
-        )
-        if side_neg_pos_diff < 0:
-            side_neg_pos_diff *= 2
-        ratio = (((adx + side_neg_pos_diff) / 2) if side != None else adx) / 100
+        adxnp2 *= cs / csa
+        ratio = adxnp2 / 100
         return 0 if ratio < 0 else (1 if ratio > 1 else ratio)
 
     def count_sz(self, price: float, ctVal: float, lever: int) -> Union[int, float]:
