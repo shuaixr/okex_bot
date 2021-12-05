@@ -161,21 +161,12 @@ class Task:
         adx = row["adx"]
         adx_neg = row["adx_neg"]
         adx_pos = row["adx_pos"]
-        ratio = (
-            (
-                (
-                    adx
-                    + (
-                        adx_pos - adx_neg
-                        if side == POS_SIDE_LONG
-                        else adx_neg - adx_pos
-                    )
-                )
-                / 2
-            )
-            if side != None
-            else adx
-        ) / 100
+        side_neg_pos_diff = (
+            adx_pos - adx_neg if side == POS_SIDE_LONG else adx_neg - adx_pos
+        )
+        if side_neg_pos_diff < 0:
+            side_neg_pos_diff *= 2
+        ratio = (((adx + side_neg_pos_diff) / 2) if side != None else adx) / 100
         return 0 if ratio < 0 else (1 if ratio > 1 else ratio)
 
     def count_sz(self, price: float, ctVal: float, lever: int) -> Union[int, float]:
