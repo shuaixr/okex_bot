@@ -233,7 +233,7 @@ class Task:
             d = await client.set_leverage(id, str(lever), MGN_MODE_CROSS)
             if d["code"] == "0":
                 await self.refresh_positions()
-                self.logger.debug(f"Change lever to {lever}")
+                self.logger.debug(f"Change lever to {lever}, ratio: {self.ratio}")
             else:
                 self.logger.warning(f"Change lever failed. Msg: {str(d)}")
 
@@ -348,7 +348,7 @@ class Task:
         if sz == availPos:
             return
         diff = sz - availPos
-        self.logger.debug(f"Change sz {diff}.")
+        self.logger.debug(f"Change sz {diff}, ratio: {self.ratio}")
         coside = (
             (SIDE_SELL if diff < 0 else SIDE_BUY)
             if self.positions["posSide"] == POS_SIDE_LONG
