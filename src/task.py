@@ -74,7 +74,7 @@ class Task:
         )
         self.indicators_cache: DataFrame = None
         self.indicators_cache_time = None
-
+        self.ratio_h = None
         pass
 
     async def asyncinit(self):
