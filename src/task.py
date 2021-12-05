@@ -368,7 +368,7 @@ class Task:
             lever = self.count_lever(1, int(self.instruments["lever"]))
             await self.set_lever(lever=lever)
         if side != None:
-            self.logger.debug(f"New side {side} at {self.side_history}")
+            self.logger.debug(f"New side {side}")
             await self.change_side(side)
         elif self.positions["availPos"] != "":
             await self.change_sz(float(klines.iloc[-2]["Close"]))
