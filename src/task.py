@@ -158,33 +158,33 @@ class Task:
 
     def count_ratio(self, klines: DataFrame, side: str) -> float:
         row = klines.iloc[-2]
-        close = klines["Close"]
-        open = klines["Open"]
-        pm = klines["PMax"]
-        pm_ma = klines["PMax_MA"]
+        close = row["Close"]
+        open = row["Open"]
+        pm = row["PMax"]
+        pm_ma = row["PMax_MA"]
         csa, cs = 6, 6
         adx = row["adx"]
         if side == POS_SIDE_LONG:
-            if (close < open).bool():
+            if close < open:
                 cs - 1
-            if (close < pm).bool():
+            if close < pm:
                 cs - 1
-            if (close < pm_ma).bool():
+            if close < pm_ma:
                 cs - 1
-            if (open < pm_ma).bool():
+            if open < pm_ma:
                 cs - 1
-            if (open < pm).bool():
+            if open < pm:
                 cs - 1
         elif side == POS_SIDE_SHORT:
-            if (close > open).bool():
+            if close > open:
                 cs - 1
-            if (close > pm).bool():
+            if close > pm:
                 cs - 1
-            if (close > pm_ma).bool():
+            if close > pm_ma:
                 cs - 1
-            if (open > pm_ma).bool():
+            if open > pm_ma:
                 cs - 1
-            if (open > pm).bool():
+            if open > pm:
                 cs - 1
         print(cs)
         adx *= cs / csa
