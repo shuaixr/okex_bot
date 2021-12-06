@@ -10,6 +10,8 @@ from okex import (
 )
 import asyncio
 
+from task import round_step_size
+
 
 async def main():
     ok = OKEX(
@@ -20,7 +22,7 @@ async def main():
     )
     await ok.asyncinit()
     id = "FIL-USDT-220325"
-    print("short" == POS_SIDE_SHORT)
+    print(round_step_size(0.6, 1))
     await ok.close()
 
 

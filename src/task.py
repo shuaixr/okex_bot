@@ -338,9 +338,10 @@ class Task:
         availPos = float(self.positions["availPos"])
         minsz = float(self.instruments["minSz"])
         subsz = availPos * self.sub_sz_ratio
-        round_step_size(subsz, step_size=float(self.instruments["lotSz"]))
+
         subsz = minsz if subsz < minsz else subsz
         subsz = availPos - minsz if availPos - subsz < minsz else subsz
+        round_step_size(subsz, step_size=float(self.instruments["lotSz"]))
         if subsz <= 0:
             return
 
