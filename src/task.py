@@ -396,7 +396,7 @@ class Task:
         if side != None:
             self.logger.debug(f"New side {side}")
             await self.change_side(side)
-        elif self.positions["availPos"] != "":
+        #elif self.positions["availPos"] != "":
             #await self.change_sz(float(klines.iloc[-2]["Close"]))
 
     async def run(self):
