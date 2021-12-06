@@ -1,7 +1,7 @@
 import asyncio
 import math
 from re import sub
-from typing import Union
+from typing import List, Union
 from decimal import Decimal
 from aiohttp import client
 from pandas.core.frame import DataFrame
@@ -54,14 +54,16 @@ class Task:
         max_margin: float,
         bar: str,
         sub_sz_ratio: float,
+        avg_adx_ratio: List[str],
     ) -> None:
         self.client = client
         self.id = id
         self.min_margin = min_margin
-
         self.max_margin = max_margin
         self.bar = bar
         self.sub_sz_ratio = sub_sz_ratio
+        self.avg_adx_ratio = avg_adx_ratio
+
         self.barms = stm[bar]
         self.logger = logger.getChild(f"Task({id}/{bar})")
         self.logger.debug("Task init")
@@ -148,6 +150,13 @@ class Task:
         klines["Open Time"] = pd.to_datetime(klines["Open Time"], unit="ms", utc=True)
         return klines
 
+    def init_adx_indicators(self, klines: DataFrame) -> DataFrame:
+        adx = ADXIndicator(klines["High"], klines["Low"], klines["Close"], window=28)
+        klines["adx"] = adx.adx()
+        klines["adx_neg"] = adx.adx_neg()
+        klines["adx_pos"] = adx.adx_pos()
+        return klines
+
     def init_indicators(self, klines: DataFrame) -> DataFrame:
         last_ot = klines.iloc[-2]["Open Time"]
         if self.indicators_cache_time == last_ot:
@@ -155,10 +164,7 @@ class Task:
         klines["PMax"], klines["PMax_MA"], klines["PMax_dir"], klines["hl2"] = pmax(
             klines["High"], klines["Low"], klines["Close"], 10, 3, 10
         )
-        adx = ADXIndicator(klines["High"], klines["Low"], klines["Close"], window=28)
-        klines["adx"] = adx.adx()
-        klines["adx_neg"] = adx.adx_neg()
-        klines["adx_pos"] = adx.adx_pos()
+        klines = self.init_adx_indicators(klines)
 
         self.indicators_cache_time = last_ot
         self.indicators_cache = klines
@@ -179,6 +185,35 @@ class Task:
 
         ratio = adxnp2 / 100
         return 0 if ratio < 0 else (1 if ratio > 1 else ratio)
+
+    async def count_avg_ratio(self, klines: DataFrame, side: str) -> float:
+        ratio_list: List[float] = []
+        ratio_list.append(self.count_ratio(klines, side))
+        for bar in self.avg_adx_ratio:
+            d = await self.client.candles(instId=self.id, bar=bar, limt=100)
+            if d["code"] != "0":
+                raise Exception("count_avg_ratio get kline code not 0. " + str(d))
+            klines = DataFrame(
+                pd.array(d["data"]),
+                dtype=float,
+                columns=(
+                    "Open Time",
+                    "Open",
+                    "High",
+                    "Low",
+                    "Close",
+                    "Volume",
+                    "VolumeCcy",
+                ),
+            )
+            klines = self.init_adx_indicators(klines)
+            ratio_list.append(self.count_ratio(klines, side))
+        rll = len(ratio_list)
+        ratio_sum = 0.0
+        for ratio in ratio_list:
+            ratio_sum += ratio
+
+        return ratio_sum / rll
 
     def count_sz(self, price: float, ctVal: float, lever: int) -> Union[int, float]:
         min_margin = self.min_margin
@@ -368,7 +403,7 @@ class Task:
         side = self.get_side(klines)
 
         if side != None:
-            self.ratio = self.count_ratio(
+            self.ratio = self.count_avg_ratio(
                 klines,
                 side,
             )

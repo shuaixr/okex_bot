@@ -11,4 +11,5 @@ task_list:
     bar: "5m"
     min_margin: 
     max_margin: 
+    avg_adx_ratio: ["15m","1h","4h"]
     sub_sz_ratio: 0.05
