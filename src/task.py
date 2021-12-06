@@ -340,7 +340,7 @@ class Task:
                     (await self.get_price(coside)),
                 ):
                     break
-                self.refresh_positions()
+                await self.refresh_positions()
             else:
                 break
         coside = SIDE_BUY if side == POS_SIDE_LONG else SIDE_SELL
