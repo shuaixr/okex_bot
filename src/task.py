@@ -388,7 +388,7 @@ class Task:
             ),
         )
         if self.ratio_h != self.ratio:
-            self.logger.debug(f"Ratio changed to {self.ratio},by:{str(klines)}")
+            #self.logger.debug(f"Ratio changed to {self.ratio},by:{str(klines)}")
             self.ratio_h = self.ratio
         if side != None or self.positions["availPos"] != "":
             lever = self.count_lever(1, int(self.instruments["lever"]))
@@ -397,7 +397,7 @@ class Task:
             self.logger.debug(f"New side {side}")
             await self.change_side(side)
         elif self.positions["availPos"] != "":
-            await self.change_sz(float(klines.iloc[-2]["Close"]))
+            #await self.change_sz(float(klines.iloc[-2]["Close"]))
 
     async def run(self):
         try:
