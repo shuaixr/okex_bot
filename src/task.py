@@ -82,7 +82,7 @@ class Task:
         )
         self.indicators_cache: DataFrame = None
         self.indicators_cache_time = None
-        self.last_sub_sz_time = None
+        self.last_sub_sz_time = 0.0
         pass
 
     async def asyncinit(self):
