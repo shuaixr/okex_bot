@@ -72,4 +72,4 @@ def pmax(
         Pmax = longStop if dir == 1 else shortStop
         df.at[index, "PMax"] = Pmax
 
-    return df["PMax"], df["MA"], df["dir"]
+    return df["PMax"], df["MA"], df["dir"], df["src"]

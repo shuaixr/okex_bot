@@ -11,3 +11,4 @@ task_list:
     bar: "5m"
     min_margin: 
     max_margin: 
+    sub_sz_ratio: 0.05

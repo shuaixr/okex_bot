@@ -1,5 +1,6 @@
 import asyncio
 import math
+from re import sub
 from typing import Union
 from decimal import Decimal
 from aiohttp import client
@@ -46,7 +47,13 @@ def round_step_size(
 
 class Task:
     def __init__(
-        self, client: OKEX, id: int, min_margin: float, max_margin: float, bar: str
+        self,
+        client: OKEX,
+        id: int,
+        min_margin: float,
+        max_margin: float,
+        bar: str,
+        sub_sz_ratio: float,
     ) -> None:
         self.client = client
         self.id = id
@@ -54,6 +61,7 @@ class Task:
 
         self.max_margin = max_margin
         self.bar = bar
+        self.sub_sz_ratio = sub_sz_ratio
         self.barms = stm[bar]
         self.logger = logger.getChild(f"Task({id}/{bar})")
         self.logger.debug("Task init")
@@ -74,7 +82,7 @@ class Task:
         )
         self.indicators_cache: DataFrame = None
         self.indicators_cache_time = None
-        self.ratio_h = None
+        self.last_sub_sz_time = None
         pass
 
     async def asyncinit(self):
@@ -144,7 +152,7 @@ class Task:
         last_ot = klines.iloc[-2]["Open Time"]
         if self.indicators_cache_time == last_ot:
             return self.indicators_cache
-        klines["PMax"], klines["PMax_MA"], klines["PMax_dir"] = pmax(
+        klines["PMax"], klines["PMax_MA"], klines["PMax_dir"], klines["hl2"] = pmax(
             klines["High"], klines["Low"], klines["Close"], 10, 3, 10
         )
         adx = ADXIndicator(klines["High"], klines["Low"], klines["Close"], window=28)
@@ -158,10 +166,6 @@ class Task:
 
     def count_ratio(self, klines: DataFrame, side: str) -> float:
         row = klines.iloc[-2]
-        close = row["Close"]
-        open = row["Open"]
-        pm = row["PMax"]
-        pm_ma = row["PMax_MA"]
 
         adx = row["adx"]
         adx_neg = row["adx_neg"]
@@ -172,32 +176,7 @@ class Task:
         if side_neg_pos_diff < 0:
             side_neg_pos_diff *= 2
         adxnp2 = ((adx + side_neg_pos_diff) / 2) if side != None else adx
-        cs = 6
-        csa = cs
-        if side == POS_SIDE_LONG:
-            if close < open:
-                cs -= 1
-            if close < pm:
-                cs -= 1
-            if close < pm_ma:
-                cs -= 1
-            if open < pm_ma:
-                cs -= 1
-            if open < pm:
-                cs -= 1
-        elif side == POS_SIDE_SHORT:
 
-            if close > open:
-                cs -= 1
-            if close > pm:
-                cs -= 1
-            if close > pm_ma:
-                cs -= 1
-            if open > pm_ma:
-                cs -= 1
-            if open > pm:
-                cs -= 1
-        adxnp2 *= cs / csa
         ratio = adxnp2 / 100
         return 0 if ratio < 0 else (1 if ratio > 1 else ratio)
 
@@ -343,28 +322,40 @@ class Task:
             (await self.get_price(coside)),
         )
 
-    async def change_sz(self, price: float):
-        ctVal = (float)(self.instruments["ctVal"])
-        lever = await self.get_lever()
-        sz = self.count_sz(price, ctVal, lever)
-        availPos = int(self.positions["availPos"])
-        if sz == availPos:
+    async def sub_sz(self, klines: DataFrame):
+        row = klines.iloc[-2]
+
+        opents = pd.Timestamp(row["Open Time"]).timestamp()
+        if opents <= self.last_sub_sz_time and self.last_sub_sz_time != 0:
             return
-        diff = sz - availPos
-        self.logger.debug(f"Change sz {diff}, ratio: {self.ratio}")
-        coside = (
-            (SIDE_SELL if diff < 0 else SIDE_BUY)
-            if self.positions["posSide"] == POS_SIDE_LONG
-            else (SIDE_BUY if diff < 0 else SIDE_SELL)
-        )
-        await self.create_order_wait_filled(
+        hl2 = row["hl2"]
+        pm = row["PMax"]
+        posside = self.positions["posSide"]
+        if posside == POS_SIDE_LONG and hl2 > pm:
+            return
+        if posside == POS_SIDE_SHORT and hl2 < pm:
+            return
+        availPos = float(self.positions["availPos"])
+        minsz = float(self.instruments["minSz"])
+        subsz = availPos * self.sub_sz_ratio
+        round_step_size(subsz, step_size=float(self.instruments["lotSz"]))
+        subsz = minsz if subsz < minsz else subsz
+        subsz = availPos - minsz if availPos - subsz < minsz else subsz
+        if subsz <= 0:
+            return
+
+        self.logger.debug(f"Sub sz {subsz}")
+        coside = SIDE_SELL if posside == POS_SIDE_LONG else SIDE_BUY
+
+        if await self.create_order_wait_filled(
             ORDER_TD_MODE_CROSS,
             coside,
             ORDER_TYPE_LIMIT,
-            abs(diff),
+            subsz,
             self.positions["posSide"],
             (await self.get_price(coside)),
-        )
+        ):
+            self.last_sub_sz_time = opents
 
     async def __run(self):
 
@@ -375,29 +366,17 @@ class Task:
 
         side = self.get_side(klines)
 
-        self.ratio = self.count_ratio(
-            klines,
-            (
-                side
-                if side != None
-                else (
-                    self.positions["posSide"]
-                    if self.positions["availPos"] != ""
-                    else None
-                )
-            ),
-        )
-        if self.ratio_h != self.ratio:
-            #self.logger.debug(f"Ratio changed to {self.ratio},by:{str(klines)}")
-            self.ratio_h = self.ratio
-        if side != None or self.positions["availPos"] != "":
+        if side != None:
+            self.ratio = self.count_ratio(
+                klines,
+                side,
+            )
             lever = self.count_lever(1, int(self.instruments["lever"]))
             await self.set_lever(lever=lever)
-        if side != None:
             self.logger.debug(f"New side {side}")
             await self.change_side(side)
-        #elif self.positions["availPos"] != "":
-            #await self.change_sz(float(klines.iloc[-2]["Close"]))
+        elif self.positions["availPos"] != "":
+            await self.sub_sz(klines)
 
     async def run(self):
         try:
