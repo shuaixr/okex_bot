@@ -344,7 +344,7 @@ class Task:
         round_step_size(subsz, step_size=float(self.instruments["lotSz"]))
         if subsz <= 0:
             return
-
+        subsz = int(subsz) if subsz.is_integer() else subsz
         self.logger.debug(f"Sub sz {subsz}")
         coside = SIDE_SELL if posside == POS_SIDE_LONG else SIDE_BUY
 
