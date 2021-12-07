@@ -265,10 +265,13 @@ class Task:
     def get_side(self, klines: DataFrame) -> str:
         row2 = klines.iloc[-2]
         row3 = klines.iloc[-3]
+        posside = (
+            None if self.positions["availPos"] == "0" else self.positions["posSide"]
+        )
         side = None
         if row3["PMax_dir"] != row2["PMax_dir"]:
             side = POS_SIDE_LONG if row2["PMax_dir"] == 1 else POS_SIDE_SHORT
-        if side == self.positions["posSide"]:
+        if side == posside:
             side = None
         return side
 

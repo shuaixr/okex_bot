@@ -22,7 +22,7 @@ async def main():
     )
     await ok.asyncinit()
     id = "FIL-USDT-220325"
-    print(round_step_size(0.6, 1))
+    print(await ok.get_positions(INST_TYPE_FUTURES, instId=id))
     await ok.close()
 
 
