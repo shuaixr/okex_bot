@@ -403,7 +403,7 @@ class Task:
         side = self.get_side(klines)
 
         if side != None:
-            self.ratio = self.count_avg_ratio(
+            self.ratio = await self.count_avg_ratio(
                 klines,
                 side,
             )
