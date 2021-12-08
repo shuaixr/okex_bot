@@ -207,6 +207,7 @@ class Task:
                     "VolumeCcy",
                 ),
             )
+            klines = klines.loc[::-1].set_index(klines.index)
             klines = self.init_adx_indicators(klines)
             ratio_list.append(self.count_ratio(klines, side))
         rll = len(ratio_list)
