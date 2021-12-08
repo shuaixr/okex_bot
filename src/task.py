@@ -118,6 +118,7 @@ class Task:
                 before=before,
                 limt=100,
             )
+            await asyncio.sleep(0.1)
             if candles["code"] != "0":
                 raise Exception("get_thousand_kline code not 0. " + str(candles))
             klines = klines.append(
@@ -265,13 +266,10 @@ class Task:
     def get_side(self, klines: DataFrame) -> str:
         row2 = klines.iloc[-2]
         row3 = klines.iloc[-3]
-        posside = (
-            None if self.positions["availPos"] == "0" else self.positions["posSide"]
-        )
         side = None
         if row3["PMax_dir"] != row2["PMax_dir"]:
             side = POS_SIDE_LONG if row2["PMax_dir"] == 1 else POS_SIDE_SHORT
-        if side == posside:
+        if side == self.positions["posSide"]:
             side = None
         return side
 
