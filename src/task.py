@@ -163,7 +163,7 @@ class Task:
         if self.indicators_cache_time == last_ot:
             return self.indicators_cache
         klines["PMax"], klines["PMax_MA"], klines["PMax_dir"], klines["hl2"] = pmax(
-            klines["High"], klines["Low"], klines["Close"], 10, 3, 10
+            klines["High"], klines["Low"], klines["Close"], 100, 3, 10
         )
         klines = self.init_adx_indicators(klines)
 
