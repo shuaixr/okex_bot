@@ -103,10 +103,11 @@ class Task:
         limt: int = 100,
     ):
         async with self.candles_lock:
-            self.client.candles(
+            candles = await self.client.candles(
                 instId=instId, bar=bar, after=after, before=before, limt=limt
             )
             await asyncio.sleep(0.1)
+        return candles
 
     async def get_thousand_kline(self) -> DataFrame:
         client = self.client
