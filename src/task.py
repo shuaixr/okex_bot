@@ -55,6 +55,7 @@ class Task:
         bar: str,
         sub_sz_ratio: float,
         avg_adx_ratio: List[str],
+        candles_lock: asyncio.Lock,
     ) -> None:
         self.client = client
         self.id = id
@@ -63,14 +64,15 @@ class Task:
         self.bar = bar
         self.sub_sz_ratio = sub_sz_ratio
         self.avg_adx_ratio = avg_adx_ratio
+        self.candles_lock = candles_lock
 
         self.barms = stm[bar]
+
         self.logger = logger.getChild(f"Task({id}/{bar})")
         self.logger.debug("Task init")
 
         self.positions = None
         self.ratio = 0.0
-
         self.klines_cache = pd.DataFrame(
             columns=(
                 "Open Time",
@@ -92,6 +94,20 @@ class Task:
             await self.client.get_instruments(INST_TYPE_FUTURES, None, self.id)
         )["data"][0]
 
+    async def candles(
+        self,
+        instId: str,
+        bar: str = None,
+        after: str = None,
+        before: str = None,
+        limt: int = 100,
+    ):
+        async with self.candles_lock:
+            self.client.candles(
+                instId=instId, bar=bar, after=after, before=before, limt=limt
+            )
+            await asyncio.sleep(0.1)
+
     async def get_thousand_kline(self) -> DataFrame:
         client = self.client
         klines = pd.DataFrame(
@@ -111,7 +127,7 @@ class Task:
         before = None
         after = None
         for _ in range(10):
-            candles = await client.candles(
+            candles = await self.candles(
                 self.id,
                 self.bar,
                 after=after,
@@ -163,7 +179,7 @@ class Task:
         if self.indicators_cache_time == last_ot:
             return self.indicators_cache
         klines["PMax"], klines["PMax_MA"], klines["PMax_dir"], klines["hl2"] = pmax(
-            klines["High"], klines["Low"], klines["Close"], 100, 3, 10
+            klines["High"], klines["Low"], klines["Close"], 100, 3, 12
         )
         klines = self.init_adx_indicators(klines)
 
@@ -191,7 +207,7 @@ class Task:
         ratio_list: List[float] = []
         ratio_list.append(self.count_ratio(klines, side))
         for bar in self.avg_adx_ratio:
-            d = await self.client.candles(instId=self.id, bar=bar, limt=100)
+            d = await self.candles(instId=self.id, bar=bar, limt=100)
             if d["code"] != "0":
                 raise Exception("count_avg_ratio get kline code not 0. " + str(d))
             klines = DataFrame(

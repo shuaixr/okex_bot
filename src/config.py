@@ -38,7 +38,7 @@ class Config:
         )
         await client.asyncinit()
         self.client = client
-
+        candles_lock = asyncio.Lock()
         for item in self.config["task_list"]:
             get_local_or_global_config = lambda s: item.get(s, self.config.get(s))
             task = Task(
@@ -49,5 +49,6 @@ class Config:
                 sub_sz_ratio=item["sub_sz_ratio"],
                 avg_adx_ratio=item["avg_adx_ratio"],
                 bar=get_local_or_global_config("bar"),
+                candles_lock=candles_lock,
             )
             self.task_list.append(task)
