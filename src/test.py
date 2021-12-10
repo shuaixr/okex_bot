@@ -21,7 +21,7 @@ async def main():
         True,
     )
     await ok.asyncinit()
-    id = "FIL-USDT-220325"
+    id = "EOS-USDT-220325"
     print(await ok.get_positions(INST_TYPE_FUTURES, instId=id))
     await ok.close()
 

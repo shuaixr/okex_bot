@@ -135,7 +135,6 @@ class Task:
                 before=before,
                 limt=100,
             )
-            await asyncio.sleep(0.1)
             if candles["code"] != "0":
                 raise Exception("get_thousand_kline code not 0. " + str(candles))
             klines = klines.append(
@@ -197,11 +196,14 @@ class Task:
         side_neg_pos_diff = (
             adx_pos - adx_neg if side == POS_SIDE_LONG else adx_neg - adx_pos
         )
+        """
         if side_neg_pos_diff < 0:
             side_neg_pos_diff *= 2
         adxnp2 = ((adx + side_neg_pos_diff) / 2) if side != None else adx
-
+        
         ratio = adxnp2 / 100
+        """
+        ratio = side_neg_pos_diff * 2
         return 0 if ratio < 0 else (1 if ratio > 1 else ratio)
 
     async def count_avg_ratio(self, klines: DataFrame, side: str) -> float:
@@ -278,8 +280,49 @@ class Task:
         if d["code"] != "0":
             self.logger.warning(f"refresh_positions failed. Msg: {str(d)}")
             return
-
-        self.positions = d["data"][0]
+        if len(d["data"]) == 0:
+            self.positions = {
+                "adl": "",
+                "availPos": "",
+                "avgPx": "",
+                "cTime": "",
+                "ccy": "",
+                "deltaBS": "",
+                "deltaPA": "",
+                "gammaBS": "",
+                "gammaPA": "",
+                "imr": "",
+                "instId": "",
+                "instType": "",
+                "interest": "0",
+                "last": "",
+                "lever": "",
+                "liab": "",
+                "liabCcy": "",
+                "liqPx": "",
+                "margin": "",
+                "markPx": "",
+                "mgnMode": "",
+                "mgnRatio": "",
+                "mmr": "",
+                "notionalUsd": "",
+                "optVal": "",
+                "pos": "",
+                "posCcy": "",
+                "posId": "",
+                "posSide": "",
+                "thetaBS": "",
+                "thetaPA": "",
+                "tradeId": "",
+                "uTime": "",
+                "upl": "",
+                "uplRatio": "",
+                "usdPx": "",
+                "vegaBS": "",
+                "vegaPA": "",
+            }
+        else:
+            self.positions = d["data"][0]
 
     def get_side(self, klines: DataFrame) -> str:
         row2 = klines.iloc[-2]
