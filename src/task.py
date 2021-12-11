@@ -128,6 +128,11 @@ class Task:
         before = None
         after = None
         for _ in range(10):
+
+            if end != None and before != None and before < end:
+                klines = klines.append(self.klines_cache, ignore_index=True)
+                klines = klines.drop_duplicates(subset=["Open Time"], ignore_index=True)
+                break
             candles = await self.candles(
                 self.id,
                 self.bar,
@@ -135,7 +140,7 @@ class Task:
                 before=before,
                 limt=100,
             )
-            self.logger.debug("Get l")
+            self.logger.debug(f"Get k{str(candles)}")
             if candles["code"] != "0":
                 raise Exception("get_thousand_kline code not 0. " + str(candles))
             klines = klines.append(
@@ -154,10 +159,6 @@ class Task:
                 ),
                 ignore_index=True,
             )
-            if end != None and before != None and before < end:
-                klines = klines.append(self.klines_cache, ignore_index=True)
-                klines = klines.drop_duplicates(subset=["Open Time"], ignore_index=True)
-                break
             after = (int)(klines.iloc[-1]["Open Time"])
             before = after - (self.barms * 11)
         if len(klines.index) > 1000:
