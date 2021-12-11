@@ -203,7 +203,8 @@ class Task:
         
         ratio = adxnp2 / 100
         """
-        ratio = side_neg_pos_diff * 2
+        ratio = 0.0
+        ratio = side_neg_pos_diff * 2 / 100
         return 0 if ratio < 0 else (1 if ratio > 1 else ratio)
 
     async def count_avg_ratio(self, klines: DataFrame, side: str) -> float:
