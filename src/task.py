@@ -71,7 +71,7 @@ class Task:
 
         self.barms = stm[bar]
 
-        self.logger = logger.getChild(f"Task({id}/{bar})")
+        self.logger = logger.getChild(f"Task({id}/{bar}/mal({mal}))")
         self.logger.debug("Task init")
 
         self.positions = None
