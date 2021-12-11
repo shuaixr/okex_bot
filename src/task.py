@@ -160,10 +160,10 @@ class Task:
                 klines = klines.drop_duplicates(subset=["Open Time"], ignore_index=True)
                 break
             after = (int)(klines.iloc[-1]["Open Time"])
-            before = after - self.barms * 11
+            before = after - (self.barms * 11)
         if len(klines.index) > 1000:
             klines = klines.head(1000)
-        logger.debug(f"kl{len(klines.index)}")
+        logger.debug(f"{self.id}\n{str(klines)}")
         self.klines_cache = klines
         klines = klines.loc[::-1].set_index(klines.index)
 
