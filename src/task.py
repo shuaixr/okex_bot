@@ -53,6 +53,7 @@ class Task:
         min_margin: float,
         max_margin: float,
         bar: str,
+        mal,
         sub_sz_ratio: float,
         avg_adx_ratio: List[str],
         candles_lock: asyncio.Lock,
@@ -63,6 +64,7 @@ class Task:
         self.min_margin = min_margin
         self.max_margin = max_margin
         self.bar = bar
+        self.mal = mal
         self.sub_sz_ratio = sub_sz_ratio
         self.avg_adx_ratio = avg_adx_ratio
         self.candles_lock = candles_lock
@@ -184,7 +186,7 @@ class Task:
         if self.indicators_cache_time == last_ot:
             return self.indicators_cache
         klines["PMax"], klines["PMax_MA"], klines["PMax_dir"], klines["hl2"] = pmax(
-            klines["High"], klines["Low"], klines["Close"], 100, 3, 12
+            klines["High"], klines["Low"], klines["Close"], 100, 3, self.mal
         )
         klines = self.init_adx_indicators(klines)
 

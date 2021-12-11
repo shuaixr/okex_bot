@@ -9,6 +9,7 @@ telegram:
 task_list:
   - id: "DOT-USDT-220325"
     inst_type: "FUTURES"
+    mal:
     bar: "5m"
     min_margin: 
     max_margin: 
