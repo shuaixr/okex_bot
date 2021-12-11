@@ -123,7 +123,7 @@ class Task:
             )
         )
         end = None
-        if len(self.klines_cache.index) != 1000:
+        if len(self.klines_cache.index) == 1000:
             end = (int)(self.klines_cache.iloc[2]["Open Time"])
         before = None
         after = None
