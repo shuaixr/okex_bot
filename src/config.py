@@ -44,6 +44,7 @@ class Config:
             task = Task(
                 client=client,
                 id=item["id"],
+                inst_type=item["inst_type"],
                 min_margin=item["min_margin"],
                 max_margin=item["max_margin"],
                 sub_sz_ratio=item["sub_sz_ratio"],

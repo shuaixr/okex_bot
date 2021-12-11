@@ -21,8 +21,8 @@ async def main():
         True,
     )
     await ok.asyncinit()
-    id = "EOS-USDT-220325"
-    print(await ok.get_positions(INST_TYPE_FUTURES, instId=id))
+    id = "DOT-USDT-SWAP"
+    print(await ok.get_instruments(instType=INST_TYPE_FUTURES, instId=id))
     await ok.close()
 
 

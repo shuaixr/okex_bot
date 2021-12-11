@@ -10,7 +10,6 @@ from log import logger
 import pandas as pd
 import traceback
 from okex import (
-    INST_TYPE_FUTURES,
     MGN_MODE_CROSS,
     OKEX,
     ORDER_TD_MODE_CROSS,
@@ -49,6 +48,7 @@ class Task:
     def __init__(
         self,
         client: OKEX,
+        inst_type: str,
         id: int,
         min_margin: float,
         max_margin: float,
@@ -58,6 +58,7 @@ class Task:
         candles_lock: asyncio.Lock,
     ) -> None:
         self.client = client
+        self.inst_type = inst_type
         self.id = id
         self.min_margin = min_margin
         self.max_margin = max_margin
@@ -91,7 +92,7 @@ class Task:
 
     async def asyncinit(self):
         self.instruments = (
-            await self.client.get_instruments(INST_TYPE_FUTURES, None, self.id)
+            await self.client.get_instruments(self.inst_type, None, self.id)
         )["data"][0]
 
     async def candles(
@@ -281,7 +282,7 @@ class Task:
                 self.logger.warning(f"Change lever failed. Msg: {str(d)}")
 
     async def refresh_positions(self):
-        d = await self.client.get_positions(INST_TYPE_FUTURES, self.id)
+        d = await self.client.get_positions(self.inst_type, self.id)
         if d["code"] != "0":
             self.logger.warning(f"refresh_positions failed. Msg: {str(d)}")
             return
