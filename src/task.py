@@ -123,8 +123,7 @@ class Task:
             )
         )
         end = None
-        self.logger.debug(f"len{len(self.klines_cache.index)}")
-        if len(self.klines_cache.index) == 1000:
+        if len(self.klines_cache.index) != 0:
             end = (int)(self.klines_cache.iloc[2]["Open Time"])
         before = None
         after = None
@@ -163,7 +162,7 @@ class Task:
             before = after - (self.barms * 11)
         if len(klines.index) > 1000:
             klines = klines.head(1000)
-        logger.debug(f"{self.id}\n{str(klines)}")
+        # logger.debug(f"{self.id}\n{str(klines)}")
         self.klines_cache = klines
         klines = klines.loc[::-1].set_index(klines.index)
 
