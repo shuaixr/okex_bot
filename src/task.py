@@ -163,6 +163,7 @@ class Task:
             before = after - self.barms * 11
         if len(klines.index) > 1000:
             klines = klines.head(1000)
+        logger.debug(f"kl{len(klines.index)}")
         self.klines_cache = klines
         klines = klines.loc[::-1].set_index(klines.index)
 
