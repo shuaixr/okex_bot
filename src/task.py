@@ -434,8 +434,16 @@ class Task:
         if posside == POS_SIDE_SHORT and hl2 < pm:
             return
         availPos = float(self.positions["availPos"])
+        avgPx = float(self.positions["avgPx"])
         minsz = float(self.instruments["minSz"])
-        subsz = availPos * self.sub_sz_ratio
+        subsz = 0.0
+        if (posside == POS_SIDE_LONG and hl2 < avgPx) or (
+            posside == POS_SIDE_SHORT and hl2 > avgPx
+        ):
+            subsz = availPos * self.sub_sz_ratio
+        else:
+            subsz = availPos * abs(hl2 - pm) / abs(pm - avgPx)
+            logger.debug(f"SubSZ by ratio {abs(hl2 - pm) / abs(pm - avgPx)}")
 
         subsz = minsz if subsz < minsz else subsz
         subsz = availPos - minsz if availPos - subsz < minsz else subsz
