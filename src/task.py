@@ -135,6 +135,7 @@ class Task:
                 before=before,
                 limt=100,
             )
+            self.logger.debug("Get l")
             if candles["code"] != "0":
                 raise Exception("get_thousand_kline code not 0. " + str(candles))
             klines = klines.append(
