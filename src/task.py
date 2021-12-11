@@ -159,6 +159,8 @@ class Task:
                 ),
                 ignore_index=True,
             )
+
+            self.logger.debug(f"Get k{str(klines)}")
             after = (int)(klines.iloc[-1]["Open Time"])
             before = after - (self.barms * 11)
         if len(klines.index) > 1000:
