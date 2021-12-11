@@ -123,6 +123,7 @@ class Task:
             )
         )
         end = None
+        self.logger.debug(f"len{len(self.klines_cache.index)}")
         if len(self.klines_cache.index) == 1000:
             end = (int)(self.klines_cache.iloc[2]["Open Time"])
         before = None
