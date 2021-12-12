@@ -44,6 +44,10 @@ def round_step_size(
     return float(front + "." + behind[0:precision])
 
 
+def pmaxdir_to_posside(dir: int) -> str:
+    return POS_SIDE_LONG if dir == 1 else POS_SIDE_SHORT
+
+
 class Task:
     def __init__(
         self,
@@ -337,7 +341,7 @@ class Task:
         row3 = klines.iloc[-3]
         side = None
         if row3["PMax_dir"] != row2["PMax_dir"]:
-            side = POS_SIDE_LONG if row2["PMax_dir"] == 1 else POS_SIDE_SHORT
+            side = pmaxdir_to_posside(row2["PMax_dir"])
         if side == self.positions["posSide"]:
             side = None
         return side
@@ -430,12 +434,14 @@ class Task:
     async def sub_sz(self, klines: DataFrame):
         row = klines.iloc[-2]
 
+        posside = self.positions["posSide"]
+        if pmaxdir_to_posside(row["PMax_dir"]) != posside:
+            return
         opents = pd.Timestamp(row["Open Time"]).timestamp()
         if opents <= self.last_sub_sz_time and self.last_sub_sz_time != 0:
             return
         hl2 = row["hl2"]
         pm = row["PMax"]
-        posside = self.positions["posSide"]
         if posside == POS_SIDE_LONG and hl2 > pm:
             return
         if posside == POS_SIDE_SHORT and hl2 < pm:
