@@ -10,6 +10,7 @@ from log import logger
 import pandas as pd
 import traceback
 from okex import (
+    INST_TYPE_SWAP,
     MGN_MODE_CROSS,
     OKEX,
     ORDER_TD_MODE_CROSS,
@@ -289,6 +290,8 @@ class Task:
 
     async def refresh_positions(self):
         d = await self.client.get_positions(self.inst_type, self.id)
+        if d["code"] != "51030" and self.inst_type == INST_TYPE_SWAP:
+            return
         if d["code"] != "0":
             self.logger.warning(f"refresh_positions failed. Msg: {str(d)}")
             return
