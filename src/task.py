@@ -463,7 +463,7 @@ class Task:
 
         subsz = minsz if subsz < minsz else subsz
         subsz = availPos - minsz if availPos - subsz < minsz else subsz
-        round_step_size(subsz, step_size=float(self.instruments["lotSz"]))
+        subsz=round_step_size(subsz, step_size=float(self.instruments["lotSz"]))
         if subsz <= 0:
             return
         subsz = int(subsz) if subsz.is_integer() else subsz
