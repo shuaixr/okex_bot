@@ -48,6 +48,7 @@ class Config:
                 min_margin=item["min_margin"],
                 max_margin=item["max_margin"],
                 mal=get_local_or_global_config("mal"),
+                atrm=get_local_or_global_config("ATR_m"),
                 sub_sz_ratio=item["sub_sz_ratio"],
                 avg_adx_ratio=item["avg_adx_ratio"],
                 bar=get_local_or_global_config("bar"),
