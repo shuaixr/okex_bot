@@ -27,8 +27,8 @@ stm = {
     "15m": 9000000,
     "30m": 18000000,
     "1H": 36000000,
-    "2H": 7200000,
-    "4H": 14400000,
+    "2H": 72000000,
+    "4H": 144000000,
 }
 
 
@@ -465,7 +465,7 @@ class Task:
 
         subsz = minsz if subsz < minsz else subsz
         subsz = availPos - minsz if availPos - subsz < minsz else subsz
-        subsz=round_step_size(subsz, step_size=float(self.instruments["lotSz"]))
+        subsz = round_step_size(subsz, step_size=float(self.instruments["lotSz"]))
         if subsz <= 0:
             return
         subsz = int(subsz) if subsz.is_integer() else subsz
