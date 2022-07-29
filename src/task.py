@@ -341,7 +341,7 @@ class Task:
 
     def get_side(self, klines: DataFrame) -> str:
         row2 = klines.iloc[-2]
-        self.logger.debug(f"{str(row2)}")
+        # self.logger.debug(f"{str(row2)}")
 
         row3 = klines.iloc[-3]
         side = None
