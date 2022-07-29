@@ -56,27 +56,19 @@ class Task:
         client: OKEX,
         inst_type: str,
         id: int,
-        min_margin: float,
-        max_margin: float,
         bar: str,
         mal: int,
         atrm: int,
         sz: str,
-        sub_sz_ratio: float,
-        avg_adx_ratio: List[str],
         candles_lock: asyncio.Lock,
     ) -> None:
         self.sz = sz
         self.client = client
         self.inst_type = inst_type
         self.id = id
-        self.min_margin = min_margin
-        self.max_margin = max_margin
         self.bar = bar
         self.mal = mal
         self.atrm = atrm
-        self.sub_sz_ratio = sub_sz_ratio
-        self.avg_adx_ratio = avg_adx_ratio
         self.candles_lock = candles_lock
 
         self.barms = stm[bar]
