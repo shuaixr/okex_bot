@@ -152,7 +152,7 @@ class Task:
 
             klines = klines.append(
                 DataFrame(
-                    pd.array(candles["data"]),
+                    candles["data"],
                     dtype=float,
                     columns=(
                         "Open Time",
