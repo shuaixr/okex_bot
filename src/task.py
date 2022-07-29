@@ -23,6 +23,7 @@ from okex import (
 from pmax import pmax
 
 stm = {
+    "1m": 600000,
     "5m": 3000000,
     "15m": 9000000,
     "30m": 18000000,
@@ -60,10 +61,12 @@ class Task:
         bar: str,
         mal: int,
         atrm: int,
+        sz: str,
         sub_sz_ratio: float,
         avg_adx_ratio: List[str],
         candles_lock: asyncio.Lock,
     ) -> None:
+        self.sz = sz
         self.client = client
         self.inst_type = inst_type
         self.id = id
@@ -78,7 +81,9 @@ class Task:
 
         self.barms = stm[bar]
 
-        self.logger = logger.getChild(f"Task({id}/{bar}/mal({mal}))")
+        self.logger = logger.getChild(
+            f"Task({id}/{bar}/sz({sz})/mal({mal})/atrm({atrm}))"
+        )
         self.logger.debug("Task init")
 
         self.positions = None
@@ -193,9 +198,9 @@ class Task:
         if self.indicators_cache_time == last_ot:
             return self.indicators_cache
         klines["PMax"], klines["PMax_MA"], klines["PMax_dir"], klines["hl2"] = pmax(
-            klines["High"], klines["Low"], klines["Close"], 100, self.atrm, self.mal
+            klines["High"], klines["Low"], klines["Close"], 3, self.atrm, self.mal
         )
-        klines = self.init_adx_indicators(klines)
+        # klines = self.init_adx_indicators(klines)
 
         self.indicators_cache_time = last_ot
         self.indicators_cache = klines
@@ -423,10 +428,8 @@ class Task:
             else:
                 break
         coside = SIDE_BUY if side == POS_SIDE_LONG else SIDE_SELL
-        price = await self.get_price(coside)
-        ctVal = (float)(self.instruments["ctVal"])
-        lever = await self.get_lever()
-        sz = self.count_sz(price, ctVal, lever)
+
+        sz = self.sz
         await self.create_order_wait_filled(
             ORDER_TD_MODE_CROSS,
             coside,
@@ -492,16 +495,18 @@ class Task:
         side = self.get_side(klines)
 
         if side != None:
+            """
             self.ratio = await self.count_avg_ratio(
                 klines,
                 side,
             )
             lever = self.count_lever(1, int(self.instruments["lever"]))
             await self.set_lever(lever=lever)
+            """
             self.logger.debug(f"New side {side}")
             await self.change_side(side)
-        elif self.positions["availPos"] != "":
-            await self.sub_sz(klines)
+        """elif self.positions["availPos"] != "":
+            await self.sub_sz(klines)"""
 
     async def run(self):
         try:

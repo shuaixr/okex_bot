@@ -7,11 +7,9 @@ telegram:
   token: ""
   id: ""
 task_list:
-  - id: "DOT-USDT-220325"
-    inst_type: "FUTURES"
-    mal:
-    bar: "5m"
-    min_margin: 
-    max_margin: 
-    avg_adx_ratio: ["15m","1h","4h"]
-    sub_sz_ratio: 0.05
+  - id: "DOT-USDT-SWAP"
+    inst_type: "SWAP"
+    mal: 5
+    atrm: 1
+    bar: "1m"
+    sz: "5"
