@@ -44,6 +44,7 @@ class Config:
             task = Task(
                 client=client,
                 id=item["id"],
+                sz=item["sz"],
                 inst_type=item["inst_type"],
                 mal=get_local_or_global_config("mal"),
                 atrm=get_local_or_global_config("atrm"),
