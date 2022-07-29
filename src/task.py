@@ -149,6 +149,7 @@ class Task:
             )
             if candles["code"] != "0":
                 raise Exception("get_thousand_kline code not 0. " + str(candles))
+            logger.info(candles["data"])
             klines = klines.append(
                 DataFrame(
                     pd.array(candles["data"]),
