@@ -46,6 +46,7 @@ class Config:
                 id=item["id"],
                 sz=item["sz"],
                 inst_type=item["inst_type"],
+                atrl=get_local_or_global_config("atrl"),
                 mal=get_local_or_global_config("mal"),
                 atrm=get_local_or_global_config("atrm"),
                 bar=get_local_or_global_config("bar"),

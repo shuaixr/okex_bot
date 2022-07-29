@@ -59,9 +59,11 @@ class Task:
         bar: str,
         mal: int,
         atrm: int,
+        atrl: int,
         sz: str,
         candles_lock: asyncio.Lock,
     ) -> None:
+        self.atrl = atrl
         self.sz = sz
         self.client = client
         self.inst_type = inst_type
@@ -191,7 +193,12 @@ class Task:
         if self.indicators_cache_time == last_ot:
             return self.indicators_cache
         klines["PMax"], klines["PMax_MA"], klines["PMax_dir"], klines["hl2"] = pmax(
-            klines["High"], klines["Low"], klines["Close"], 3, self.atrm, self.mal
+            klines["High"],
+            klines["Low"],
+            klines["Close"],
+            self.atrl,
+            self.atrm,
+            self.mal,
         )
         # klines = self.init_adx_indicators(klines)
 

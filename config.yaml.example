@@ -11,5 +11,6 @@ task_list:
     inst_type: "SWAP"
     mal: 5
     atrm: 1
+    atrl: 3
     bar: "1m"
     sz: "5"
