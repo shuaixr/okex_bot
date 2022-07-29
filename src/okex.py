@@ -208,7 +208,7 @@ class OKEX:
     async def __api(self, method: str, urlpath: str, param: dict, security_type: str):
         param = {k: v for k, v in param.items() if v is not None}
 
-        baseurl = "https://www.okex.com/"
+        baseurl = "https://www.okx.com/"
         url = urljoin(baseurl, urlpath)
         headers = {}
         if self.testnet:
