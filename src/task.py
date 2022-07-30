@@ -30,6 +30,7 @@ stm = {
     "1H": 36000000,
     "2H": 72000000,
     "4H": 144000000,
+    "1Dutc": 864000000,
 }
 
 
@@ -492,6 +493,7 @@ class Task:
         await self.refresh_positions()
 
         klines = await self.get_thousand_kline()
+
         klines = self.init_indicators(klines)
 
         side = self.get_side(klines)

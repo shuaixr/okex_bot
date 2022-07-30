@@ -16,7 +16,7 @@ async def main():
         await asyncio.gather(
             *[asyncio.create_task(task.run()) for task in config.task_list]
         )
-        await asyncio.sleep(3)
+        await asyncio.sleep(30)
 
 
 if __name__ == "__main__":
