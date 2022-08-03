@@ -4,3 +4,4 @@ data/
 logger.log
 */__pycache__
 kline.csv
+klines/
