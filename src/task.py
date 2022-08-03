@@ -495,7 +495,7 @@ class Task:
         klines = await self.get_thousand_kline()
 
         klines = self.init_indicators(klines)
-        klines.to_csv("klines/{self.id}_{self.bar}.csv", sep="\t", encoding="utf-8")
+        klines.to_csv(f"klines/{self.id}_{self.bar}.csv", sep="\t", encoding="utf-8")
 
         side = self.get_side(klines)
 
