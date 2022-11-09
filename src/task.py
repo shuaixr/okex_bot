@@ -164,7 +164,7 @@ class Task:
                         "Low",
                         "Close",
                         "Volume",
-                        "VolumeCcy","volCcyQuote"
+                        "VolumeCcy","volCcyQuote",
                     ),
                 ),
                 ignore_index=True,
